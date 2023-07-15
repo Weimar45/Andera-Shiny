@@ -26,6 +26,7 @@ library(DT)
 
 # Paquetes para el estudio 
 library(phyloseq)
+library(vegan)
 library(skimr)
 library(ggcorrplot)
 library(ggstatsplot)
@@ -50,7 +51,7 @@ mytheme <- create_theme(
   
   adminlte_color(
     
-    light_blue = "#434C5E"
+    light_blue = "#5D263E"
     
   ),
   
@@ -59,8 +60,8 @@ mytheme <- create_theme(
     width = "400px",
     dark_bg = "#D8DEE9",
     dark_hover_bg = "#81A1C1",
-    dark_color = "#2E3440",
-    dark_submenu_color = "#2E3440"
+    dark_color = "#5D263E",
+    dark_submenu_color = "#5D263E"
     
   ),
   
@@ -72,5 +73,3 @@ mytheme <- create_theme(
     
   )
 )
-
-
