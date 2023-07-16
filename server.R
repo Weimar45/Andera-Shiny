@@ -72,13 +72,12 @@ server <- function(input, output, session) {
     selectizeInput("value", "Seleccione los valores que desea  filtrar:", choices = unique(sample_data(physeq())[,input$variable]), multiple = TRUE)
   })
   
-  # Bug a arreglar
+
   physeq_filtered <- reactive({
-    filtered_data <- physeq()
-    if (!is.null(input$filter)) {
-      return(ps_filter(filtered_data, input$variable %in% input$value))
+    if (!is.null(input$value)) { 
+      return(microViz::ps_filter(physeq(), eval(parse(text = input$variable)) %in% input$value))
     }
-    return(filtered_data)
+    return(physeq())
   })
   
   observeEvent(input$filter, {
