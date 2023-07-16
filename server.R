@@ -22,6 +22,14 @@ server <- function(input, output, session) {
     }
   })
   
+  # Verificar que el objeto phyloseq tiene árbol filogenético
+  has_tree <- tryCatch({
+    phy_tree(physeq())
+    TRUE
+  }, error = function(e) {
+    FALSE
+  })
+  
   # Descargar el objeto phyloseq
   output$downloadData <- downloadHandler(
     filename = function() {
@@ -31,13 +39,6 @@ server <- function(input, output, session) {
       saveRDS(physeq(), file)
     }
   )
-  
-  # Filtrado del objeto phyloseq
-  observeEvent(input$filter, {
-    physeq_temp <- prune_taxa(taxa_sums(physeq()) > input$min_count, physeq())
-    physeq(physeq_temp)
-  })
-  
  
   observeEvent(input$update, {
     # Mostrar la estructura del objeto phyloseq
@@ -46,9 +47,68 @@ server <- function(input, output, session) {
     })
     
     # Generar el árbol filogenético
-    output$phylo_tree <- renderPlot({
-      plot_tree(physeq(), color = "SampleType")
+    if (has_tree) { 
+      
+      output$phylo_tree <- renderPlot({
+        
+        plot_tree(physeq(), color = "SampleType")
+        
+      })
+      
+    } else { 
+      
+      shinyalert(title = "Warning", text = "El objeto phyloseq cargado carece de árbol filogenético", type = "warning")
+      
+    }
+  })
+  
+  # Filtrado del objeto phyloseq
+  output$variableui <- renderUI({
+    selectInput("variable", "Selecciona una variable de metadata:", choices = colnames(sample_data(physeq())))
+  })
+  
+  output$valueui <- renderUI({
+    req(input$variable)
+    selectizeInput("value", "Seleccione los valores que desea  filtrar:", choices = unique(sample_data(physeq())[,input$variable]), multiple = TRUE)
+  })
+  
+  # Bug a arreglar
+  physeq_filtered <- reactive({
+    filtered_data <- physeq()
+    if (!is.null(input$filter)) {
+      return(ps_filter(filtered_data, input$variable %in% input$value))
+    }
+    return(filtered_data)
+  })
+  
+  observeEvent(input$filter, {
+    
+    # physeq() <- prune_taxa(taxa_sums(physeq()) > input$min_count)
+    
+    # Mostrar la estructura del objeto phyloseq
+    output$filtered_physeq_summary <- renderPrint({
+      print(physeq_filtered())
     })
+    
+    # Generar el árbol filogenético
+    if (has_tree) { 
+      
+      output$phylo_tree <- renderPlot({
+        
+        plot_tree(physeq_filtered(), color = "SampleType")
+        
+      })
+      
+    } else { 
+      
+      shinyalert(title = "Warning", text = "El objeto phyloseq cargado carece de árbol filogenético", type = "warning")
+      
+    }
+
+  })
+  
+  ### DIVIDIR EN DOS BOX Y AÑADIR QUE EL USUARUI ELIHJA VARIABLE PARA COLOREAR
+  observeEvent(input$update_diversity, {
     
     # Realizar el análisis de diversidad alfa
     diversity_data <- plot_richness(physeq(), measures = input$diversity, color = "SampleType")
@@ -58,35 +118,40 @@ server <- function(input, output, session) {
       diversity_data
     })
     
-    # Realizar el análisis de diversidad beta
-    # distance_matrix <- phyloseq::distance(physeq(), method = input$distance)
+  })
+  
+  
+  observeEvent(input$update_heatmaps, {
     
     # Generar los mapas de calor de abundancia de OTUs y especies
     output$heatmap_otus <- renderPlot({
       plot_heatmap(physeq(), taxa.label = "OTU")
     })
+    
     output$heatmap_species <- renderPlot({
       plot_heatmap(physeq(), taxa.label = "Species")
     })
     
-    # Realizar PCoA
-    # pcoa <- ape::pcoa(distance_matrix)
-    
-    # Generar el gráfico de PCoA
-    #output$pcoaPlot <- renderPlot({
-    #  ggplot(pcoa$vectors, aes_string(x = "Axis.1", y = "Axis.2")) +
-    #    geom_point() +
-    #    theme_minimal()
-    #})
-    
-    # Realizar la prueba PERMANOVA
-    # permanova_results <- adonis(distance_matrix ~ sample_data(physeq())$Group)
-    
-    # Mostrar los resultados de la prueba PERMANOVA
-    #output$permanovaResults <- renderTable({
-    #  permanova_results$aov.tab
-    #})
   })
+  
+  # Realizar PCoA
+  # pcoa <- ape::pcoa(distance_matrix)
+  
+  # Generar el gráfico de PCoA
+  #output$pcoaPlot <- renderPlot({
+  #  ggplot(pcoa$vectors, aes_string(x = "Axis.1", y = "Axis.2")) +
+  #    geom_point() +
+  #    theme_minimal()
+  #})
+  
+  # Realizar la prueba PERMANOVA
+  # permanova_results <- adonis(distance_matrix ~ sample_data(physeq())$Group)
+  
+  # Mostrar los resultados de la prueba PERMANOVA
+  #output$permanovaResults <- renderTable({
+  #  permanova_results$aov.tab
+  #})
+  
   
   
   

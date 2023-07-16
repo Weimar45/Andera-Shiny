@@ -24,15 +24,19 @@ library(tidyverse)
 library(data.table)
 library(DT)
 
-# Paquetes para el estudio 
-library(phyloseq)
-library(vegan)
+# Paquetes para el estudio estadístico
 library(skimr)
 library(ggcorrplot)
 library(ggstatsplot)
 library(PMCMRplus)
 library(psych)
 
+# Paquetes de bioconductor
+library(phyloseq)
+library(vegan)
+library(microbiome)
+library(ComplexHeatmap)
+library(microViz)
 
 # Carga de paquetes para editar las paletas de los gráficos
 library(palettetown)

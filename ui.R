@@ -23,6 +23,7 @@ ui <- dashboardPage(
     # Se añade el tema que se ha creado en fresh para la Dashboard. 
     use_theme(mytheme),
     
+    
     tabItems(
       # Tab de Carga de Datos
       tabItem(tabName = "data_load",
@@ -79,8 +80,26 @@ ui <- dashboardPage(
                   collapsible = TRUE,
                   width = 12,
                   numericInput("min_count", "Número mínimo de conteos", value = 0, min = 0),
-                  numericInput("min_prevalence", "Prevalencia mínima", value = 0, min = 0, max = 1, step = 0.01),
+                  uiOutput("variableui"),
+                  uiOutput("valueui"),
+                  #numericInput("min_prevalence", "Prevalencia mínima", value = 0, min = 0, max = 1, step = 0.01),
                   actionButton("filter", "Filtrar")
+                ),
+                box(
+                  title = "Resumen del Objeto Phyloseq",
+                  status = "primary",
+                  solidHeader = TRUE,
+                  collapsible = TRUE,
+                  width = 12,
+                  verbatimTextOutput("filtered_physeq_summary")
+                ),
+                box(
+                  title = "Árbol Filogenético",
+                  status = "primary",
+                  solidHeader = TRUE,
+                  collapsible = TRUE,
+                  width = 12,
+                  plotOutput("filtered_phylo_tree")
                 )
               )
       ),
@@ -96,7 +115,8 @@ ui <- dashboardPage(
                   selectInput("diversity", "Seleccione el tipo de diversidad", 
                               choices = c("Chao1", "ACE", "Shannon", "Simpson", "InvSimpson", "Fisher"), 
                               multiple = TRUE, selected = c('Shannon', 'Simpson')),
-                  selectInput("distance", "Seleccione el tipo de distancia", choices = c("bray", "jaccard", "unifrac", "wunifrac")),
+                  actionButton("update_diversity", "Actualizar"),
+                  #selectInput("distance", "Seleccione el tipo de distancia", choices = c("bray", "jaccard", "unifrac", "wunifrac")),
                   plotOutput("diversityPlot")
                 )
               )
@@ -104,6 +124,14 @@ ui <- dashboardPage(
       # Tab de Mapas de Calor
       tabItem(tabName = "heatmaps",
               fluidRow(
+                box(
+                  title = "Mapas de Calor",
+                  status = "primary",
+                  solidHeader = TRUE,
+                  collapsible = TRUE,
+                  width = 12,
+                  actionButton("update_heatmaps", "Actualizar"),
+                ),
                 box(
                   title = "Mapa de Calor de Abundancia de OTUs",
                   status = "primary",
