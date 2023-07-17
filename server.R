@@ -2,7 +2,6 @@
 server <- function(input, output, session) {
   
   # ----- Variables Reactivas -----
-  # Código para el servidor
   physeq <- reactive({
     if (input$data_source == "Archivo") {
       if (!is.null(input$file1)) {
@@ -30,7 +29,7 @@ server <- function(input, output, session) {
     FALSE
   })
   
-  # Descargar el objeto phyloseq
+  # ----- Descargar el objeto Phyloseq -----
   output$downloadData <- downloadHandler(
     filename = function() {
       paste("phyloseq-", Sys.Date(), ".rds", sep="")
@@ -40,13 +39,14 @@ server <- function(input, output, session) {
     }
   )
  
+  # ----- Observar el objeto Phyloseq seleccionado -----
   observeEvent(input$update, {
     # Mostrar la estructura del objeto phyloseq
     output$physeq_summary <- renderPrint({
       print(physeq())
     })
     
-    # Generar el árbol filogenético
+    # Generar el árbol filogenético si existe dentro del objeto
     if (has_tree) { 
       
       output$phylo_tree <- renderPlot({
@@ -62,55 +62,77 @@ server <- function(input, output, session) {
     }
   })
   
-  # Filtrado del objeto phyloseq
+  # Servidor de Tab para el Filtrado del Objeto Phyloseq
+  
+  # Inicializa physeq_filtered como NULL
+  physeq_filtered <- reactiveVal(NULL)
+  
+  # Actualiza physeq_filtered cuando se carga physeq
+  observe({
+    if (!is.null(physeq())) {
+      physeq_filtered(physeq())
+    }
+  })
+  
   output$variableui <- renderUI({
-    selectInput("variable", "Selecciona una variable de metadata:", choices = colnames(sample_data(physeq())))
+    selectInput("variable", "Selecciona una variable de metadata", choices = colnames(sample_data(physeq_filtered())))
   })
   
   output$valueui <- renderUI({
     req(input$variable)
-    selectizeInput("value", "Seleccione los valores que desea  filtrar:", choices = unique(sample_data(physeq())[,input$variable]), multiple = TRUE)
+    selectizeInput("value", "Seleccione los valores que desea  filtrar", choices = unique(sample_data(physeq_filtered())[,input$variable]), multiple = TRUE)
   })
   
-
-  physeq_filtered <- reactive({
-    if (!is.null(input$value)) { 
-      return(microViz::ps_filter(physeq(), eval(parse(text = input$variable)) %in% input$value))
-    }
-    return(physeq())
-  })
-  
+  # Actualiza physeq_filtered cada vez que el usuario aplique un filtro
   observeEvent(input$filter, {
     
-    # physeq() <- prune_taxa(taxa_sums(physeq()) > input$min_count)
+    req(input$variable)
+    req(input$value)
     
-    # Mostrar la estructura del objeto phyloseq
-    output$filtered_physeq_summary <- renderPrint({
-      print(physeq_filtered())
-    })
-    
-    # Generar el árbol filogenético
-    if (has_tree) { 
-      
-      output$phylo_tree <- renderPlot({
-        
-        plot_tree(physeq_filtered(), color = "SampleType")
-        
+    # Verifica si la variable seleccionada existe en los datos de muestra
+    if (input$variable %in% colnames(sample_data(physeq_filtered()))) {
+      # Aplica el filtro a physeq_filtered en lugar de physeq
+      filtered <- tryCatch({
+        ps_filter(physeq_filtered(), eval(parse(text = input$variable)) %in% input$value)
+      }, error = function(e) {
+        NULL
       })
       
-    } else { 
-      
-      shinyalert(title = "Warning", text = "El objeto phyloseq cargado carece de árbol filogenético", type = "warning")
-      
+      # Verifica si el filtro fue exitoso
+      if (!is.null(filtered)) {
+        # Actualiza physeq_filtered con el resultado del filtro
+        physeq_filtered(filtered)
+        
+        # Mostrar la estructura del objeto phyloseq
+        output$filtered_physeq_summary <- renderPrint({
+          print(physeq_filtered())
+        })
+        
+        # Generar el árbol filogenético
+        if (has_tree) { 
+          output$phylo_tree <- renderPlot({
+            plot_tree(physeq_filtered(), color = "SampleType")
+          })
+        } else { 
+          shinyalert(title = "Warning", text = "El objeto phyloseq cargado carece de árbol filogenético", type = "warning")
+        }
+      } else {
+        # Muestra una alerta shiny si el filtro no fue exitoso
+        shinyalert(title = "Error", text = "El filtro no pudo ser aplicado. Por favor, verifica las variables y los valores seleccionados.", type = "error")
+      }
+    } else {
+      # Muestra una alerta shiny si la variable seleccionada no existe en los datos de muestra
+      shinyalert(title = "Error", text = paste("La variable seleccionada", input$variable, "no existe en los datos de muestra"), type = "error")
     }
-
   })
+
   
-  ### DIVIDIR EN DOS BOX Y AÑADIR QUE EL USUARUI ELIHJA VARIABLE PARA COLOREAR
+  
+  ### Dividir la interfaz en dos cajas y dejar que el usuario coloree por la variable de metadata que quiera
   observeEvent(input$update_diversity, {
     
     # Realizar el análisis de diversidad alfa
-    diversity_data <- plot_richness(physeq(), measures = input$diversity, color = "SampleType")
+    diversity_data <- plot_richness(physeq(), measures = input$diversity) #, color = "SampleType")
     
     # Generar el gráfico de diversidad
     output$diversityPlot <- renderPlot({

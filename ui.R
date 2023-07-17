@@ -13,7 +13,8 @@ ui <- dashboardPage(
       menuItem("Diversidad Alfa y Beta", tabName = "diversity", icon = icon("chart-bar")),
       menuItem("Mapas de Calor", tabName = "heatmaps", icon = icon("chart-bar")),
       menuItem("PCoA", tabName = "pcoa", icon = icon("chart-pie")),
-      menuItem("PERMANOVA", tabName = "permanova", icon = icon("table"))
+      menuItem("PERMANOVA", tabName = "permanova", icon = icon("table")),
+      menuItem("Grafos", tabName = "grafos", icon = icon("table"))
     )
   ),
   
