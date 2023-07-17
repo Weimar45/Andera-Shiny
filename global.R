@@ -24,14 +24,14 @@ library(tidyverse)
 library(data.table)
 library(DT)
 
-# Paquetes para el estudio estadístico
+# Carga de los paquetes para el estudio estadístico
 library(skimr)
 library(ggcorrplot)
 library(ggstatsplot)
 library(PMCMRplus)
 library(psych)
 
-# Paquetes de bioconductor
+# Carga de los paquetes de bioconductor
 library(phyloseq)
 library(vegan)
 library(microbiome)
