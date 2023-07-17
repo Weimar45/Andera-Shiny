@@ -7,7 +7,7 @@
 
 # ----- Zona General ----
 
-# Carga de los paquetes de shiny
+# Carga de los paquetes para el desarrollo de la shiny
 library(shiny)
 library(shinycssloaders)
 library(shinydashboard)
