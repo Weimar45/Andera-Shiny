@@ -9,12 +9,12 @@ ui <- dashboardPage(
     # Código para la barra lateral
     sidebarMenu(
       menuItem("Carga de Datos", tabName = "data_load", icon = icon("database")),
-      menuItem("Filtrado", tabName = "filtering", icon = icon("filter")),
-      menuItem("Diversidad Alfa y Beta", tabName = "diversity", icon = icon("chart-bar")),
-      menuItem("Mapas de Calor", tabName = "heatmaps", icon = icon("chart-bar")),
-      menuItem("PCoA", tabName = "pcoa", icon = icon("chart-pie")),
-      menuItem("PERMANOVA", tabName = "permanova", icon = icon("table")),
-      menuItem("Grafos", tabName = "grafos", icon = icon("table"))
+      menuItem("Filtrado", tabName = "filtering", icon = icon("yin-yang")),
+      menuItem("Diversidad Alfa y Beta", tabName = "diversity", icon = icon("bank")),
+      menuItem("Mapas de Calor", tabName = "heatmaps", icon = icon("snowflake")),
+      menuItem("PCoA", tabName = "pcoa", icon = icon("hurricane")),
+      menuItem("PERMANOVA", tabName = "permanova", icon = icon("flask-vial")),
+      menuItem("Grafos", tabName = "grafos", icon = icon("spider", lib = "font-awesome"))
     )
   ),
   
@@ -178,7 +178,19 @@ ui <- dashboardPage(
                   tableOutput("permanovaResults")
                 )
               )
+      ),
+      # Tab de Grafos
+      tabItem(tabName = "grafos",
+              fluidRow(
+                box(
+                  title = "Grafos",
+                  status = "primary",
+                  solidHeader = TRUE,
+                  collapsible = TRUE,
+                  width = 12,
+                  actionButton("update_graph", "Actualizar"),
+                )        
       )
     )
   )
-)
+))
