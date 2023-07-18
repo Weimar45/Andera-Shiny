@@ -108,7 +108,7 @@ ui <- dashboardPage(
       tabItem(tabName = "diversity",
               fluidRow(
                 box(
-                  title = "Diversidad Alfa y Beta",
+                  title = "Estudio de la Riqueza",
                   status = "primary",
                   solidHeader = TRUE,
                   collapsible = TRUE,
@@ -116,8 +116,16 @@ ui <- dashboardPage(
                   selectInput("diversity", "Seleccione el tipo de diversidad", 
                               choices = c("Chao1", "ACE", "Shannon", "Simpson", "InvSimpson", "Fisher"), 
                               multiple = TRUE, selected = c('Shannon', 'Simpson')),
+                  uiOutput("alpha_variableui"),
                   actionButton("update_diversity", "Actualizar"),
                   #selectInput("distance", "Seleccione el tipo de distancia", choices = c("bray", "jaccard", "unifrac", "wunifrac")),
+                ),
+                box(
+                  title = "Diversidad Alfa & Beta",
+                  status = "primary",
+                  solidHeader = TRUE,
+                  collapsible = TRUE,
+                  width = 12,
                   plotOutput("diversityPlot")
                 )
               )
