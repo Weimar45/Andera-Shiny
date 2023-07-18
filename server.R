@@ -74,7 +74,7 @@ server <- function(input, output, session) {
     }
   })
   
-  #  Filtrado del Objeto Phyloseq
+  # ----- Filtrado del Objeto Phyloseq -----
   
   # Inicializa physeq_filtered como NULL
   physeq_filtered <- reactiveVal(NULL)
@@ -122,7 +122,7 @@ server <- function(input, output, session) {
         
         # Generar el árbol filogenético
         if (has_tree()) { 
-          output$phylo_tree <- renderPlot({
+          output$filtered_phylo_tree <- renderPlot({
             plot_tree(physeq_filtered(), color = "SampleType")
           })
         } else { 
@@ -140,22 +140,29 @@ server <- function(input, output, session) {
 
   
   
-  ### Dividir la interfaz en dos cajas y dejar que el usuario coloree por la variable de metadata que quiera
+  # ----- Estudio de la Diversidad -----
   
   output$alpha_variableui <- renderUI({
-    selectInput("variable", "Selecciona una variable de metadata", choices = colnames(sample_data(physeq_filtered())))
+    if (is.null(physeq_filtered())) {
+      selectInput("variable_alpha", "Selecciona una variable de metadata", choices = colnames(sample_data(physeq())))
+    } else {
+      selectInput("variable_alpha", "Selecciona una variable de metadata", choices = colnames(sample_data(physeq_filtered())))
+    }
   })
   
   observeEvent(input$update_diversity, {
     
     # Realizar el análisis de diversidad alfa
-    diversity_data <- plot_richness(physeq_filtered(), measures = input$diversity, color = input$alpha_variableui)
+    if (is.null(physeq_filtered())) {
+      diversity_data <- plot_richness(physeq(), measures = input$diversity, color = input$variable_alpha)
+    } else {
+      diversity_data <- plot_richness(physeq_filtered(), measures = input$diversity, color = input$variable_alpha)
+    }
     
     # Generar el gráfico de diversidad
     output$diversityPlot <- renderPlot({
       diversity_data
     })
-    
   })
   
   
@@ -172,7 +179,8 @@ server <- function(input, output, session) {
     
   })
   
-  # Realizar PCoA
+  # ----- Realizar PCoA -----
+  
   # pcoa <- ape::pcoa(distance_matrix)
   
   # Generar el gráfico de PCoA
@@ -182,7 +190,8 @@ server <- function(input, output, session) {
   #    theme_minimal()
   #})
   
-  # Realizar la prueba PERMANOVA
+  # ----- Realizar la prueba PERMANOVA -----
+  
   # permanova_results <- adonis(distance_matrix ~ sample_data(physeq())$Group)
   
   # Mostrar los resultados de la prueba PERMANOVA
@@ -190,7 +199,7 @@ server <- function(input, output, session) {
   #  permanova_results$aov.tab
   #})
   
-  
+  # ----- Estudio de Grafos -----
   
   
 }
