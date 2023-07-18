@@ -22,11 +22,23 @@ server <- function(input, output, session) {
   })
   
   # Verificar que el objeto phyloseq tiene árbol filogenético
-  has_tree <- tryCatch({
-    phy_tree(physeq())
-    TRUE
-  }, error = function(e) {
-    FALSE
+  has_tree <- reactive({
+    tryCatch({
+      cat("Trying to get the phylogenetic tree...\n")
+      tree <- phy_tree(physeq())
+      
+      cat("Got the tree, checking if it's NULL...\n")
+      if (is.null(tree)) {
+        cat("The tree is NULL.\n")
+        return(FALSE)
+      } else {
+        cat("The tree is not NULL.\n")
+        return(TRUE)
+      }
+    }, error = function(e) {
+      cat("Caught an error: ", e$message, "\n")
+      return(FALSE)
+    })
   })
   
   # ----- Descargar el objeto Phyloseq -----
@@ -47,7 +59,7 @@ server <- function(input, output, session) {
     })
     
     # Generar el árbol filogenético si existe dentro del objeto
-    if (has_tree) { 
+    if (has_tree()) { 
       
       output$phylo_tree <- renderPlot({
         
@@ -62,7 +74,7 @@ server <- function(input, output, session) {
     }
   })
   
-  # Servidor de Tab para el Filtrado del Objeto Phyloseq
+  #  Filtrado del Objeto Phyloseq
   
   # Inicializa physeq_filtered como NULL
   physeq_filtered <- reactiveVal(NULL)
@@ -109,7 +121,7 @@ server <- function(input, output, session) {
         })
         
         # Generar el árbol filogenético
-        if (has_tree) { 
+        if (has_tree()) { 
           output$phylo_tree <- renderPlot({
             plot_tree(physeq_filtered(), color = "SampleType")
           })
@@ -129,10 +141,15 @@ server <- function(input, output, session) {
   
   
   ### Dividir la interfaz en dos cajas y dejar que el usuario coloree por la variable de metadata que quiera
+  
+  output$alpha_variableui <- renderUI({
+    selectInput("variable", "Selecciona una variable de metadata", choices = colnames(sample_data(physeq_filtered())))
+  })
+  
   observeEvent(input$update_diversity, {
     
     # Realizar el análisis de diversidad alfa
-    diversity_data <- plot_richness(physeq(), measures = input$diversity) #, color = "SampleType")
+    diversity_data <- plot_richness(physeq_filtered(), measures = input$diversity, color = input$alpha_variableui)
     
     # Generar el gráfico de diversidad
     output$diversityPlot <- renderPlot({
