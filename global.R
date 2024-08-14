@@ -1,13 +1,13 @@
-# ----- Descripción del Proyecto ----
+# ----- Project Description ----
 #
-# Aplicación en Shiny para el estudio de microbiomas
-# Fecha: 14/07/2023
-# Última vez editado por: Alejandro Navas González
+# Shiny application for the study of microbiomes
+# Date: 14/07/2023
+# Author: Alejandro Navas González
 #
 
-# ----- Zona General ----
+# ----- General Zone ----
 
-# Carga de los paquetes para el desarrollo de la shiny
+# Loading of the packages for shiny development
 library(shiny)
 library(shinycssloaders)
 library(shinydashboard)
@@ -16,64 +16,36 @@ library(shinyWidgets)
 library(shinymeta)
 library(htmlwidgets)
 
-# Carga del paquete utilizado para editar el tema de la interfaz
+# Loading of the package used to edit the interface theme
 library(fresh)
 
-# Carga de los paquetes a utilizar en la aplicación. 
+# Load the packages to be used for the tables in the application. 
 library(tidyverse)
 library(data.table)
 library(DT)
 
-# Carga de los paquetes para el estudio estadístico
+# Loading of the packages for the statistical study
 library(skimr)
 library(ggcorrplot)
 library(ggstatsplot)
 library(PMCMRplus)
 library(psych)
 
-# Carga de los paquetes de bioconductor
+# Loading of bioconductor packs
 library(phyloseq)
 library(vegan)
 library(microbiome)
 library(ComplexHeatmap)
 library(microViz)
 
-# Carga de paquetes para editar las paletas de los gráficos
+# Loading of packages to edit the graphics palettes
 library(palettetown)
 library(ggsci)
 library(viridis)
 library(RColorBrewer)
 
 
-
-# Establecer un tema común para los gráficos.
+# Establish a common theme for the graphics.
 theme_set(theme_light() +
             theme(text = element_text(size = 16, family = "serif")))
 
-# Creación de un tema propio para la Dashboard (paquete fresh).
-mytheme <- create_theme(
-  
-  adminlte_color(
-    
-    light_blue = "#5D263E"
-    
-  ),
-  
-  adminlte_sidebar(
-    
-    width = "400px",
-    dark_bg = "#D8DEE9",
-    dark_hover_bg = "#81A1C1",
-    dark_color = "#5D263E",
-    dark_submenu_color = "#5D263E"
-    
-  ),
-  
-  adminlte_global(
-    
-    content_bg = "#FFF",
-    box_bg = "#D8DEE9", 
-    info_box_bg = "#D8DEE9"
-    
-  )
-)
